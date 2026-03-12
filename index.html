@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KITH 2026 | NSCET Symposium</title>
+    <!--
+    =============================================================
+      GOOGLE SHEETS INTEGRATION — SETUP INSTRUCTIONS
+    =============================================================
+    STEP 1: Create a Google Sheet
+      - Go to sheets.google.com → create a new sheet
+      - Name it: "KITH 2026 Registrations"
+      - Row 1 headers (A to M):
+        Timestamp | Name | Department | Year | Mobile | Email |
+        Team Name | No. of Members | Member Details | Event |
+        College ID (Base64) | Payment Proof (Base64) | PPT/Music File (Base64)
+
+    STEP 2: Open Apps Script
+      - In the sheet: Extensions → Apps Script
+      - Delete existing code, paste the script below
+      - Save → Deploy → New Deployment
+      - Type: Web App | Execute as: Me | Who has access: Anyone
+      - Click Deploy → Copy the Web App URL
+
+    STEP 3: Paste the URL
+      - In this HTML file, find: const GOOGLE_SCRIPT_URL = "YOUR_URL_HERE";
+      - Replace with your deployed Web App URL
+
+    =============================================================
+      APPS SCRIPT CODE (paste into Apps Script editor)
+    =============================================================
+    function doPost(e) {
+      try {
+        var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+        var data = JSON.parse(e.postData.contents);
+        sheet.appendRow([
+          new Date(),
+          data.name,
+          data.department,
+          data.year,
+          data.mobile,
+          data.email,
+          data.teamName,
+          data.memberCount,
+          data.memberDetails,
+          data.event,
+          data.collegeId,
+          data.paymentProof,
+          data.submissionFile || "Will submit on event day"
+        ]);
+        return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
+      } catch(err) {
+        return ContentService.createTextOutput(JSON.stringify({status: "error", message: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+    =============================================================
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sage: #d4e6d1;
+            --lavender: #e8e4f0;
+            --cream: #fef9f0;
+            --rose: #f5e6e8;
+            --blue: #ddeeff;
+            --gold: #c9a84c;
+            --white: #ffffff;
+            --text-dark: #2d3436;
+            --text-muted: #636e72;
+            --deadline: #d63031;
+            --font-heading: 'Cormorant Garamond', serif;
+            --font-body: 'DM Sans', sans-serif;
+            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-body);
+            background-color: var(--white);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        h1, h2, h3, h4, h5 { font-family: var(--font-heading); font-weight: 600; }
+
+        /* --- Background Blobs --- */
+        .blob-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+        }
+        @keyframes blob1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(35px,-25px) scale(1.06)} 66%{transform:translate(-20px,30px) scale(0.96)} }
+        @keyframes blob2 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-40px,20px) scale(1.04)} 66%{transform:translate(25px,-35px) scale(0.97)} }
+        @keyframes blob3 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,40px) scale(1.05)} 66%{transform:translate(-30px,-20px) scale(0.95)} }
+        @keyframes blob4 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(45px,-30px) scale(1.07)} }
+        @keyframes blob5 { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(-35px,25px) scale(1.04)} 80%{transform:translate(20px,-20px) scale(0.98)} }
+        @keyframes blob6 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-25px,35px) scale(1.06)} }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 500;
+            padding: 0.5rem 0;
+            transition: var(--transition);
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+        }
+        nav.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            min-height: 90px;
+            top: 0;
+        }
+        .nav-content { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .nav-logos { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-logos img { 
+            width: 90px; 
+            height: 90px; 
+            object-fit: contain; 
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-right: 12px;
+        }
+        .nav-logos img:hover { transform: scale(1.15); }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { 
+            text-decoration: none; 
+            color: var(--text-dark); 
+            font-weight: 600; 
+            font-size: 0.95rem; 
+            transition: color 0.3s; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .nav-links a:hover { color: var(--gold); }
+        .mobile-menu-btn { display: none; background: none; border: none; cursor: pointer; }
+
+        /* --- Hero --- */
+        .hero {
+            min-height: 100vh;
+            padding-top: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            background: radial-gradient(circle at center, rgba(254, 249, 240, 0.5) 0%, transparent 70%);
+        }
+        .hero-college-container {
+            margin-bottom: 2rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+        .hero-uravinmurai {
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #8a7340;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .hero-college-name {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.2rem, 3vw, 2.2rem);
+            font-weight: 700;
+            color: var(--text-dark);
+            letter-spacing: 0.1em;
+            line-height: 1.3;
+            margin-bottom: 0.8rem;
+        }
+        .hero-college-details {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            letter-spacing: 0.02em;
+        }
+        .hero-association { font-size: 1.5rem; color: var(--gold); font-style: italic; margin-bottom: 0.5rem; }
+        .hero-dept { font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1rem; font-weight: 600; }
+        .hero-type { font-size: 1.2rem; font-style: italic; color: var(--text-muted); margin-bottom: 1rem; }
+        .hero-title { font-size: clamp(4rem, 12vw, 9rem); color: var(--gold); line-height: 0.9; margin-bottom: 1rem; }
+        .hero-subtitle { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 3rem; }
+        .hero-btns { display: flex; gap: 1.5rem; }
+
+        /* --- Animations --- */
+        .fade-up { 
+            opacity: 0; 
+            transform: translateY(40px); 
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .fade-up.in-view { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+
+        .fade-left { 
+            opacity: 0; 
+            transform: translateX(-40px); 
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .fade-left.in-view { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+
+        .fade-right { 
+            opacity: 0; 
+            transform: translateX(40px); 
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .fade-right.in-view { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+
+        /* Fallback: show everything after 1 second if observer fails */
+        body.loaded section,
+        body.loaded .fade-up,
+        body.loaded .fade-left, 
+        body.loaded .fade-right {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+
+        /* CRITICAL — add this so page is never blank: */
+        @media (prefers-reduced-motion: reduce) {
+            .fade-up, .fade-left, .fade-right {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* Safety net for all sections regardless of animation: */
+        section {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Hero section must ALWAYS be visible */
+        #home, #hero { 
+            opacity: 1 !important; 
+            visibility: visible !important; 
+        }
+
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUpScale { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        .hero-uravinmurai { animation: fadeInDown 0.6s forwards; }
+        .hero-college-name { animation: fadeInUp 0.7s forwards 0.2s; opacity: 0; }
+        .hero-college-details { animation: fadeIn 0.6s forwards 0.3s; opacity: 0; }
+        .hero-association { animation: fadeIn 0.6s forwards 0.4s; opacity: 0; }
+        .hero-dept { animation: fadeIn 0.6s forwards 0.5s; opacity: 0; }
+        .hero-type { animation: fadeIn 0.6s forwards 0.5s; opacity: 0; }
+        .hero-title { animation: fadeInUpScale 0.8s forwards 0.6s; opacity: 0; }
+        .hero-subtitle { animation: fadeIn 0.5s forwards 0.8s; opacity: 0; }
+        .hero-btns { animation: fadeInUp 0.5s forwards 1s; opacity: 0; }
+
+        .new-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--gold);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(201, 168, 76, 0.4);
+            z-index: 10;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- Event Card Morph --- */
+        .event-card {
+            transition: border-radius 0.4s ease, background 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        .event-card:hover {
+            border-radius: 20px;
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        .event-card.tech:hover { background: #f0f7f0; }
+        .event-card.nontech:hover { background: #f3f0f8; }
+        .event-card h3 { transition: transform 0.5s ease; }
+        .event-card:hover h3 { transform: scale(1.05); }
+        .event-card .badge { transition: transform 0.5s ease; }
+        .event-card:hover .badge { transform: rotate(360deg); }
+        .event-card .btn-outline {
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        .event-card:hover .btn-outline {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* --- Modal Morph --- */
+        .modal-overlay {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transform: scale(0.85) translateY(30px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        /* --- Button Interactions --- */
+        .btn { transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .btn:active { transform: scale(0.97); }
+        
+        .submit-btn {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .submit-btn.loading {
+            width: 60px !important;
+            height: 60px !important;
+            border-radius: 50% !important;
+            padding: 0 !important;
+            font-size: 0 !important;
+            min-width: 0 !important;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .submit-btn.success {
+            background: #2ecc71 !important;
+            width: 100% !important;
+            border-radius: 50px !important;
+        }
+        .submit-btn.success::after {
+            content: '✅';
+            font-size: 1.2rem;
+            margin-left: 8px;
+        }
+
+        .info-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            animation: fadeIn 0.35s ease;
+        }
+        .limit-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* --- Back to Top --- */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: #f5e8c0;
+            color: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: none;
+        }
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .back-to-top:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(201, 168, 76, 0.4);
+        }
+
+        /* --- Notice Banner --- */
+        .notice-banner {
+            background: #fff9e6; border-top: 1px solid #ffeaa7; border-bottom: 1px solid #ffeaa7;
+            padding: 1rem 0; text-align: center; font-weight: 600; font-size: 0.95rem;
+            position: relative; z-index: 100; animation: pulse 2s infinite;
+        }
+        .notice-banner b { color: var(--deadline); }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+
+        /* --- Sections --- */
+        section { padding: 100px 0; }
+        .section-header { text-align: center; margin-bottom: 4rem; }
+        .section-header h2 { font-size: 3.5rem; margin-bottom: 1rem; }
+        .section-header p { color: var(--text-muted); max-width: 700px; margin: 0 auto; }
+
+        .reveal { opacity: 0; transform: translateY(30px); transition: var(--transition); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* --- Patrons & Conveners --- */
+        .patrons-section { padding: 100px 0; }
+        .patrons-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 2rem; 
+            margin-bottom: 4rem;
+        }
+        .official-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(201, 168, 76, 0.3);
+            border-left: 4px solid var(--gold);
+            border-radius: 16px;
+            padding: 28px 32px;
+            transition: var(--transition);
+            position: relative;
+        }
+        .official-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(201, 168, 76, 0.1);
+        }
+        .label-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
+        .official-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2c2c2c;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .official-role {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+            display: block;
+            line-height: 1.4;
+        }
+        .subsection-title {
+            font-size: 1.8rem;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .subsection-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--gold);
+            opacity: 0.3;
+        }
+
+        /* --- Events Section --- */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        @media (max-width: 1024px) { .events-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .events-grid { grid-template-columns: 1fr; } }
+
+        .event-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-top: 3px solid var(--gold);
+            transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .event-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+            border-radius: 20px;
+        }
+        .event-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .event-card h3 { font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--text-dark); }
+        .event-card .badge { margin-bottom: 1rem; align-self: flex-start; }
+        .event-team { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 6px; }
+        .event-desc { font-size: 0.95rem; color: #555; margin-bottom: 1.5rem; flex-grow: 1; }
+        .event-topic { font-size: 0.85rem; font-style: italic; color: var(--gold); margin-bottom: 1.5rem; padding: 8px; background: rgba(201, 168, 76, 0.05); border-radius: 8px; }
+
+        .tab-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+        .tab-btn {
+            padding: 10px 24px;
+            border-radius: 50px;
+            border: 2px solid var(--gold);
+            background: white;
+            color: var(--text-dark);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn.active {
+            background: var(--gold);
+            color: white;
+        }
+
+        /* --- Modals --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        .modal-box {
+            background: white;
+            width: 100%;
+            max-width: 560px;
+            border-radius: 20px;
+            padding: 36px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            transform: scale(0.85) translateY(20px);
+            opacity: 0;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-overlay.active .modal-box {
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes modalIn {
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: transform 0.3s ease;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-btn:hover { transform: rotate(90deg); color: var(--text-dark); }
+        .modal-title { font-size: 2rem; color: var(--gold); margin-bottom: 1rem; display: flex; align-items: center; gap: 12px; }
+        .modal-topic { font-weight: 700; color: var(--text-dark); margin-bottom: 1rem; font-size: 1.1rem; }
+        .modal-section-title { font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; color: var(--gold); margin: 1.5rem 0 0.5rem; }
+        .modal-rules { list-style: none; }
+        .modal-rules li { margin-bottom: 8px; position: relative; padding-left: 20px; font-size: 0.95rem; }
+        .modal-rules li::before { content: '•'; position: absolute; left: 0; color: var(--gold); font-weight: bold; }
+        .modal-deadline { color: #d63031; font-weight: 700; margin-top: 1.5rem; display: block; }
+        .modal-date { font-weight: 700; margin-top: 0.5rem; display: block; }
+        .modal-footer { margin-top: 2.5rem; display: flex; gap: 1rem; }
+        .deadline-highlight { color: var(--deadline); font-weight: 700; }
+
+        /* --- Registration Fee --- */
+        .fee-section { text-align: center; }
+        .fee-card {
+            background: linear-gradient(135deg, #fef9f0, #fde8c0);
+            border-radius: 20px;
+            border: 2px solid #c9a84c;
+            padding: 48px 56px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 8px 32px rgba(201, 168, 76, 0.2);
+            text-align: center;
+        }
+        .fee-title {
+            font-size: 1rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #8a7340;
+            margin-bottom: 12px;
+        }
+        .fee-amount {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #c9a84c;
+            font-family: 'Cormorant Garamond', serif;
+            margin-bottom: 16px;
+        }
+        .fee-divider {
+            width: 60px;
+            height: 1px;
+            background: #c9a84c;
+            margin: 16px auto;
+            opacity: 0.6;
+        }
+        .fee-benefits {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+            margin-bottom: 24px;
+        }
+        .benefit-badge {
+            background: #e8f5e9;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .fee-footer-note {
+            font-size: 0.75rem;
+            color: #888;
+            font-style: italic;
+            margin-top: 16px;
+        }
+
+        /* --- Coordinators --- */
+        .coordinators-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+        .coord-list h3 { font-size: 2.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--lavender); padding-bottom: 1rem; }
+        .coord-item { margin-bottom: 1.5rem; }
+        .coord-item h5 { font-size: 1.2rem; font-weight: bold; }
+        .coord-item p { font-size: 0.9rem; color: var(--text-muted); font-style: italic; }
+        .coord-item a {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #c9a84c;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .coord-item a:hover {
+            color: #8a7340;
+            text-decoration: underline;
+        }
+
+        /* --- Form --- */
+        .registration-section { 
+            background: var(--cream); 
+            border-radius: 60px 60px 0 0; 
+            scroll-margin-top: 120px;
+            padding-top: 80px;
+        }
+        .form-container { 
+            max-width: 780px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 40px 48px; 
+            border-radius: 20px; 
+            box-shadow: 0 8px 40px rgba(0,0,0,0.08); 
+        }
+        .warning-box { background: #fff5f5; border: 1px solid #feb2b2; color: #c53030; padding: 1.5rem; border-radius: 12px; margin-bottom: 3rem; text-align: center; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .form-group { margin-bottom: 2rem; }
+        .form-group label { display: block; margin-bottom: 0.8rem; font-weight: 600; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 1rem 1.2rem; border-radius: 12px; border: 1px solid #eee; font-family: var(--font-body); transition: var(--transition); background: #fcfcfc; }
+        .form-control:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.1); }
+        .full-width { grid-column: span 2; }
+        .file-input-group { border: 2px dashed #eee; padding: 2rem; border-radius: 15px; text-align: center; cursor: pointer; transition: var(--transition); position: relative; }
+        .file-input-group:hover { border-color: var(--gold); background: var(--cream); }
+        .file-input-group input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .preview-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; margin-top: 1rem; display: none; }
+
+        .btn { padding: 1rem 2.5rem; border-radius: 50px; font-weight: 600; cursor: pointer; border: none; transition: var(--transition); text-decoration: none; display: inline-block; }
+        .btn-gold { background: linear-gradient(135deg, var(--gold), #b38f36); color: white; box-shadow: 0 10px 20px rgba(201, 168, 76, 0.2); }
+        .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(201, 168, 76, 0.3); }
+        .btn-outline { background: white; border: 1px solid rgba(0,0,0,0.1); color: var(--text-dark); }
+        .btn-outline:hover { background: var(--cream); }
+
+        /* --- Success Overlay --- */
+        .success-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .success-overlay h2 { font-size: 4rem; color: var(--gold); }
+
+        /* --- Footer --- */
+        footer { background: var(--text-dark); color: white; padding: 80px 0 40px; text-align: center; }
+        .footer-content p { color: rgba(255,255,255,0.6); margin-bottom: 0.5rem; }
+
+        .info-box {
+            background: #e8f4fd;
+            border-left: 4px solid #2196F3;
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 0.9rem;
+            color: #1a5276;
+            margin-bottom: 28px;
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            .nav-toggle {
+                display: block;
+                font-size: 1.8rem;
+                cursor: pointer;
+                color: #c9a84c;
+                z-index: 1001;
+                padding: 8px;
+                border: 2px solid #c9a84c;
+                border-radius: 8px;
+                line-height: 1;
+                background: white;
+            }
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(255,255,255,0.97);
+                backdrop-filter: blur(12px);
+                padding: 16px 0;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+                z-index: 490;
+                border-top: 2px solid #c9a84c;
+            }
+            .nav-links.open {
+                display: flex;
+                animation: slideDown 0.3s ease;
+            }
+            .nav-links li {
+                padding: 12px 32px;
+                border-bottom: 1px solid #f0ead0;
+            }
+            .nav-links a {
+                font-size: 1rem;
+                color: #2c2c2c;
+                text-decoration: none;
+                display: block;
+            }
+            .nav-toggle.active {
+                background: #c9a84c;
+                color: white;
+            }
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-10px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+
+            .hero-title { font-size: 4rem; }
+            .form-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            .full-width { grid-column: span 1; }
+            .coordinators-grid { grid-template-columns: 1fr; }
+            .form-container { padding: 24px 20px; }
+            .form-group { margin-bottom: 1.5rem; }
+            .form-control { font-size: 16px; }
+        }
+        @media (min-width: 769px) {
+            .nav-toggle { display: none; }
+            .nav-links { display: flex !important; flex-direction: row; }
+        }
+
+        .ripple { position: absolute; background: rgba(255,255,255,0.4); border-radius: 50%; transform: scale(0); animation: ripple 0.6s linear; pointer-events: none; }
+        @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+        .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="blob-container">
+        <div style="position:absolute;width:420px;height:420px;border-radius:50%;background:#d4e6d1;opacity:0.13;top:-80px;left:-100px;animation:blob1 12s ease-in-out infinite;"></div>
+        <div style="position:absolute;width:320px;height:320px;border-radius:50%;background:#e8e4f0;opacity:0.13;top:30%;right:-80px;animation:blob2 10s ease-in-out infinite 2s;"></div>
+        <div style="position:absolute;width:500px;height:500px;border-radius:50%;background:#fde8c0;opacity:0.10;bottom:-150px;left:20%;animation:blob3 14s ease-in-out infinite 1s;"></div>
+        <div style="position:absolute;width:280px;height:280px;border-radius:50%;background:#f5e6e8;opacity:0.13;top:60%;left:-60px;animation:blob4 11s ease-in-out infinite 3s;"></div>
+        <div style="position:absolute;width:360px;height:360px;border-radius:50%;background:#ddeeff;opacity:0.13;bottom:10%;right:5%;animation:blob5 13s ease-in-out infinite 4s;"></div>
+        <div style="position:absolute;width:240px;height:240px;border-radius:50%;background:#fef9f0;opacity:0.15;top:45%;left:45%;animation:blob6 9s ease-in-out infinite 1.5s;"></div>
+    </div>
+
+    <nav id="navbar">
+        <div class="container nav-content">
+            <div class="nav-logos">
+                <img src="nscetlogo.png" alt="NSCET Logo" onerror="this.src='https://picsum.photos/seed/nscet/100/100'">
+                <img src="7th_sense.png" alt="7th Sense Logo" onerror="this.src='https://picsum.photos/seed/7thsense/100/100'">
+            </div>
+            <div class="nav-toggle" id="navToggle" onclick="toggleMenu()">&#9776;</div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" onclick="closeMenu()">Home</a></li>
+                <li><a href="#about" onclick="closeMenu()">Patrons</a></li>
+                <li><a href="#events" onclick="closeMenu()">Events</a></li>
+                <li><a href="#coordinators" onclick="closeMenu()">Coordinators</a></li>
+                <li><a href="#register" onclick="closeMenu()">Register</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="hero-college-container">
+            <p class="hero-uravinmurai">Theni Melapettai Hindu Nadargal Uravinmurai</p>
+            <h2 class="hero-college-name">NADAR SARASWATHI COLLEGE OF ENGINEERING & TECHNOLOGY</h2>
+            <div class="hero-college-details">
+                Approved by AICTE, New Delhi & Affiliated to Anna University, Chennai<br>
+                Accredited by NAAC with 'A' Grade | ISO 9001:2015 Certified<br>
+                Vadapudupatti, Annanji (PO), Theni – 625531
+            </div>
+        </div>
+        <div class="hero-association">7th Sense Association</div>
+        <div class="hero-dept">Department of Science and Humanities</div>
+        <div class="hero-type">National Level Symposium</div>
+        <h1 class="hero-title">KITH - 2026</h1>
+        <div class="hero-subtitle">"Knowledge Interaction Through Humanity"</div>
+        <div class="hero-btns">
+            <a href="#events" class="btn btn-gold">Explore Events</a>
+            <a href="#register" class="btn btn-outline">Register Now</a>
+        </div>
+    </section>
+
+    <div class="notice-banner">
+        📅 Symposium Date: <b>April 10, 2026</b> | 📋 Registration & Submission Deadline: <b>April 7, 2026</b>
+    </div>
+
+    <section id="about" class="patrons-section fade-up">
+        <div class="container">
+            <div class="section-header">
+                <h2>Patrons & Conveners</h2>
+                <p>The visionaries and leaders behind KITH 2026, guiding us towards excellence.</p>
+            </div>
+            
+            <h3 class="subsection-title">PATRONS</h3>
+            <div class="patrons-grid">
+                <div class="official-card fade-up">
+                    <span class="label-badge">PATRON</span>
+                    <span class="official-name">Dr. C. Mathalai Sundaram</span>
+                    <span class="official-role">Principal</span>
+                </div>
+                <div class="official-card fade-up">
+                    <span class="label-badge">PATRON</span>
+                    <span class="official-name">Dr. A. Vembathurajesh</span>
+                    <span class="official-role">Head of the Department</span>
+                </div>
+            </div>
+
+            <h3 class="subsection-title" style="margin-top: 4rem;">CONVENERS</h3>
+            <div class="patrons-grid">
+                <div class="official-card fade-up">
+                    <span class="label-badge">CONVENER</span>
+                    <span class="official-name">Dr. C. Chithra</span>
+                    <span class="official-role">Coordinator / S & H, Professor / Mathematics</span>
+                </div>
+                <div class="official-card fade-up">
+                    <span class="label-badge">CONVENER</span>
+                    <span class="official-name">Dr. N. David Mathan</span>
+                    <span class="official-role">Professor / Chemistry</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="events" class="fade-up">
+        <div class="container">
+            <div class="section-header">
+                <h2>Events</h2>
+                <p>Participate in a wide range of technical and non-technical challenges.</p>
+                <div class="info-box" style="margin-top: 2rem;">
+                    📌 Students may participate in a maximum of TWO events. Both events can be from the same category or different — Technical + Technical, Non-Technical + Non-Technical, or Technical + Non-Technical combinations are all allowed.
+                </div>
+            </div>
+
+            <div class="tab-switcher">
+                <button class="tab-btn active" onclick="switchTab(this, 'tech')">⚙️ Technical</button>
+                <button class="tab-btn" onclick="switchTab(this, 'nontech')">🎭 Non-Technical</button>
+            </div>
+
+            <!-- Technical Events Grid -->
+            <div id="tech-grid" class="events-grid active">
+                <!-- Card 1: Paper Presentation -->
+                <div class="event-card tech">
+                    <div class="event-icon">📄</div>
+                    <span class="label-badge" style="color: #27ae60;">Technical</span>
+                    <h3>Paper Presentation</h3>
+                    <div class="event-team">👥 1–2 Members</div>
+                    <p class="event-desc">Students present technical research on engineering topics using PowerPoint.</p>
+                    <div class="event-topic">Topic: "Engineering Innovations for Sustainable Development"</div>
+                    <button class="btn btn-outline" onclick="openModal('paper')">View Details</button>
+                </div>
+
+                <!-- Card 2: Poster Presentation -->
+                <div class="event-card tech">
+                    <div class="event-icon">🖼️</div>
+                    <span class="label-badge" style="color: #27ae60;">Technical</span>
+                    <h3>Poster Presentation</h3>
+                    <div class="event-team">👥 1–2 Members</div>
+                    <p class="event-desc">Visual storytelling of engineering solutions for sustainable development.</p>
+                    <div class="event-topic">Topic: "Engineering Innovations for Sustainable Development"</div>
+                    <button class="btn btn-outline" onclick="openModal('poster')">View Details</button>
+                </div>
+
+                <!-- Card 3: Circuit Debugging -->
+                <div class="event-card tech">
+                    <div class="event-icon">🔌</div>
+                    <span class="label-badge" style="color: #27ae60;">Technical</span>
+                    <h3>Circuit Debugging</h3>
+                    <div class="event-team">👥 1–2 Members</div>
+                    <p class="event-desc">Identify and correct errors in electronic circuits or diagrams.</p>
+                    <button class="btn btn-outline" onclick="openModal('circuit')">View Details</button>
+                </div>
+
+                <!-- Card 4: Code-a-thon -->
+                <div class="event-card tech">
+                    <div class="event-icon">💻</div>
+                    <span class="label-badge" style="color: #27ae60;">Technical</span>
+                    <h3>Code-a-thon</h3>
+                    <div class="event-team">👥 1–2 Members</div>
+                    <p class="event-desc">Solve programming problems within a time limit using C, Python, or Java.</p>
+                    <button class="btn btn-outline" onclick="openModal('code')">View Details</button>
+                </div>
+
+                <!-- Card 5: Mini Startup -->
+                <div class="event-card tech">
+                    <div class="event-icon">🚀</div>
+                    <span class="label-badge" style="color: #27ae60;">Technical</span>
+                    <h3>Mini Startup</h3>
+                    <div class="event-team">👥 2–4 Members</div>
+                    <p class="event-desc">Pitch innovative startup ideas or product concepts to a panel of judges.</p>
+                    <button class="btn btn-outline" onclick="openModal('startup')">View Details</button>
+                </div>
+            </div>
+
+            <!-- Non-Technical Events Grid -->
+            <div id="nontech-grid" class="events-grid" style="display: none;">
+                <!-- Card 1: JAM -->
+                <div class="event-card nontech">
+                    <div class="event-icon">⏱️</div>
+                    <span class="label-badge" style="color: #8e44ad;">Non-Technical</span>
+                    <h3>JAM (Just A Minute)</h3>
+                    <div class="event-team">👤 Individual</div>
+                    <p class="event-desc">Speak on a given topic for one minute without hesitation or repetition.</p>
+                    <button class="btn btn-outline" onclick="openModal('jam')">View Details</button>
+                </div>
+
+                <!-- Card 2: Find the Talent -->
+                <div class="event-card nontech">
+                    <div class="event-icon">🌟</div>
+                    <span class="label-badge" style="color: #8e44ad;">Non-Technical</span>
+                    <h3>Find the Talent</h3>
+                    <div class="event-team">👤 Individual</div>
+                    <p class="event-desc">Showcase hidden talents like singing, dancing, magic, or any unique skill.</p>
+                    <button class="btn btn-outline" onclick="openModal('talent')">View Details</button>
+                </div>
+
+                <!-- Card 3: Marketing Event -->
+                <div class="event-card nontech">
+                    <div class="event-icon">📢</div>
+                    <span class="label-badge" style="color: #8e44ad;">Non-Technical</span>
+                    <h3>Marketing Event</h3>
+                    <div class="event-team">👥 2–4 Members</div>
+                    <p class="event-desc">Promote or sell a product creatively using persuasion and marketing skills.</p>
+                    <button class="btn btn-outline" onclick="openModal('marketing')">View Details</button>
+                </div>
+
+                <!-- Card 4: Visi-Verse -->
+                <div class="event-card nontech">
+                    <div class="new-badge">NEW 🎉</div>
+                    <div class="event-icon">🧩</div>
+                    <span class="label-badge" style="color: #8e44ad;">Non-Technical</span>
+                    <h3>Visi-Verse</h3>
+                    <div class="event-team">👥 1–2 Members</div>
+                    <p class="event-desc">Decode visual puzzles from a series of images to guess the hidden word!</p>
+                    <button class="btn btn-outline" onclick="openModal('visiverse')">View Details</button>
+                </div>
+
+                <!-- Card 5: Synchro-Speak -->
+                <div class="event-card nontech">
+                    <div class="new-badge">NEW 🎉</div>
+                    <div class="event-icon">🤔</div>
+                    <span class="label-badge" style="color: #8e44ad;">Non-Technical</span>
+                    <h3>Synchro-Speak</h3>
+                    <div class="event-team">👥 2 Members</div>
+                    <p class="event-desc">One member guesses the card on their head using verbal clues from their partner.</p>
+                    <button class="btn btn-outline" onclick="openModal('synchrospeak')">View Details</button>
+                </div>
+
+                <!-- Card 6: E-Sports — Free Fire -->
+                <div class="event-card nontech">
+                    <div class="new-badge">NEW 🎉</div>
+                    <div class="event-icon">🎮</div>
+                    <span class="label-badge" style="color: #8e44ad;">Non-Technical</span>
+                    <h3>E-Sports — Free Fire</h3>
+                    <div class="event-team">👥 Duo (Exactly 2 members)</div>
+                    <p class="event-desc">Compete in Free Fire duo mode. Show your gaming skills and teamwork in the ultimate battle royale challenge!</p>
+                    <button class="btn btn-outline" onclick="openModal('esports')">View Details</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fee-section fade-up">
+        <div class="container">
+            <div class="fee-card">
+                <p class="fee-title">Registration Fee</p>
+                <h3 class="fee-amount">₹ <span class="counter" data-target="300">0</span>/-</h3>
+                <div class="fee-divider"></div>
+                <div class="fee-benefits">
+                    <span class="benefit-badge">✅ Participation Certificate</span>
+                    <span class="benefit-badge">✅ Lunch Provided</span>
+                    <span class="benefit-badge">✅ Morning Refreshments</span>
+                </div>
+                <p class="fee-footer-note">* Lunch and morning refreshments are included within the registration fee. No additional charges.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="coordinators" class="container fade-up">
+        <div class="coordinators-grid">
+            <div class="coord-list fade-left">
+                <h3>Faculty Coordinators</h3>
+                <div class="coord-item">
+                    <h5>Dr. M. Veerakumar</h5>
+                    <p>Asst. Professor / Physics</p>
+                    <a href="tel:7418271435">📞 7418271435</a>
+                </div>
+                <div class="coord-item">
+                    <h5>Dr. R. Saravana Kumar</h5>
+                    <p>Asst. Professor / Chemistry</p>
+                    <a href="tel:9942368797">📞 9942368797</a>
+                </div>
+                <div class="coord-item">
+                    <h5>Mrs. M. Arulvizhi</h5>
+                    <p>Asst. Professor / Mathematics</p>
+                    <a href="tel:9600719181">📞 9600719181</a>
+                </div>
+                <div class="coord-item">
+                    <h5>Mr. R. C. Richard Britto</h5>
+                    <p>Asst. Professor / English</p>
+                    <a href="tel:8220109547">📞 8220109547</a>
+                </div>
+                <div class="coord-item">
+                    <h5>Mrs. N. Thisha</h5>
+                    <p>Assistant Professor</p>
+                    <a href="tel:7994250899">📞 7994250899</a>
+                </div>
+            </div>
+            <div class="coord-list fade-right">
+                <h3>Student Coordinators</h3>
+                <div class="coord-item">
+                    <h5>S. Marimuthu</h5>
+                    <p>Mechanical</p>
+                    <a href="tel:9688784495">📞 9688784495</a>
+                </div>
+                <div class="coord-item">
+                    <h5>M. Ramakrishnan</h5>
+                    <p>Civil</p>
+                    <a href="tel:9787907377">📞 9787907377</a>
+                </div>
+                <div class="coord-item">
+                    <h5>A. Rithika Shri</h5>
+                    <p>AI & DS</p>
+                    <a href="tel:9159765556">📞 9159765556</a>
+                </div>
+                <div class="coord-item">
+                    <h5>M. Harini</h5>
+                    <p>EEE</p>
+                    <a href="tel:9500320298">📞 9500320298</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="register" class="registration-section fade-up">
+        <div class="container">
+            <div class="section-header">
+                <h2>Register for KITH 2026</h2>
+                <p>Fill in your details below. Last date: April 7, 2026</p>
+            </div>
+            <div class="form-container">
+                <div class="warning-box">
+                    ⏰ <b>Registration closes on April 7, 2026. Symposium is on April 10, 2026.</b>
+                </div>
+                <form id="regForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Full Name *</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Department *</label>
+                            <select name="department" class="form-control" required>
+                                <option value="">Select Department</option>
+                                <option>Mechanical</option><option>Civil</option><option>EEE</option>
+                                <option>ECE</option><option>CSE</option><option>AI & DS</option>
+                                <option>IT</option><option>S&H / Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Year of Study *</label>
+                            <select name="year" class="form-control" required>
+                                <option value="">Select Year</option>
+                                <option>1st Year</option><option>2nd Year</option>
+                                <option>3rd Year</option><option>4th Year</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mobile Number *</label>
+                            <input type="tel" name="mobile" class="form-control" pattern="[0-9]{10}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="form-group" id="teamNameGroup">
+                            <label>Team Name *</label>
+                            <input type="text" name="teamName" id="teamName" class="form-control" placeholder="Enter your team name" required>
+                            <small style="font-size: 0.78rem; color: #888; font-style: italic; margin-top: 4px; display: block;">💡 Tip: If you're participating solo, just use your own name as the team name.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Number of Team Members *</label>
+                            <input type="number" name="memberCount" id="memberCount" class="form-control" min="1" required>
+                            <span class="limit-hint" id="limitHint">Select an event to see limits</span>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <div id="infoBadge" class="info-badge">
+                                ℹ️ This is an individual event. Team fields are hidden.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>First Event *</label>
+                            <select name="event1" id="eventSelect1" class="form-control" required onchange="handleEventChange()">
+                                <option value="">Select First Event</option>
+                                <optgroup label="Technical">
+                                    <option value="Paper Presentation">Paper Presentation (Max 2)</option>
+                                    <option value="Poster Presentation">Poster Presentation (Max 2)</option>
+                                    <option value="Circuit Debugging">Circuit Debugging (Max 2)</option>
+                                    <option value="Code-a-thon">Code-a-thon (Max 2)</option>
+                                    <option value="Mini Startup">Mini Startup (Max 4)</option>
+                                </optgroup>
+                                <optgroup label="Non-Technical">
+                                    <option value="JAM">JAM / Just a Minute (Individual)</option>
+                                    <option value="Find the Talent">Find the Talent (Individual)</option>
+                                    <option value="Marketing Event">Marketing Event (Max 4)</option>
+                                    <option value="Visi-Verse">Visi-Verse (Max 2)</option>
+                                    <option value="Synchro-Speak">Synchro-Speak (Exactly 2)</option>
+                                    <option value="E-Sports Free Fire">Non-Technical – E-Sports Free Fire (Duo – 2 members)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Second Event (Optional)</label>
+                            <select name="event2" id="eventSelect2" class="form-control" onchange="handleEventChange()">
+                                <option value="">Select Second Event (None)</option>
+                                <optgroup label="Technical">
+                                    <option value="Paper Presentation">Paper Presentation (Max 2)</option>
+                                    <option value="Poster Presentation">Poster Presentation (Max 2)</option>
+                                    <option value="Circuit Debugging">Circuit Debugging (Max 2)</option>
+                                    <option value="Code-a-thon">Code-a-thon (Max 2)</option>
+                                    <option value="Mini Startup">Mini Startup (Max 4)</option>
+                                </optgroup>
+                                <optgroup label="Non-Technical">
+                                    <option value="JAM">JAM / Just a Minute (Individual)</option>
+                                    <option value="Find the Talent">Find the Talent (Individual)</option>
+                                    <option value="Marketing Event">Marketing Event (Max 4)</option>
+                                    <option value="Visi-Verse">Visi-Verse (Max 2)</option>
+                                    <option value="Synchro-Speak">Synchro-Speak (Exactly 2)</option>
+                                    <option value="E-Sports Free Fire">Non-Technical – E-Sports Free Fire (Duo – 2 members)</option>
+                                </optgroup>
+                            </select>
+                            <div id="eventError" style="color: #d63031; font-size: 0.8rem; margin-top: 5px; display: none;">
+                                ⚠️ You cannot register for the same event twice.
+                            </div>
+                        </div>
+                        <div class="form-group full-width" id="memberDetailsGroup">
+                            <label>Team Members' Names & Departments</label>
+                            <textarea name="memberDetails" class="form-control" rows="3" placeholder="Name 1 - Dept, Name 2 - Dept..."></textarea>
+                        </div>
+                        <div class="form-group full-width" id="submissionFileGroup" style="display: none;">
+                            <label id="submissionLabel">Upload PPT / Music File (Optional)</label>
+                            <div class="file-input-group">
+                                <span>Choose File</span>
+                                <input type="file" name="submissionFile" id="submissionFile" accept=".ppt,.pptx,.pdf,.mp3,.mp4,.wav" onchange="previewFile(this)">
+                                <img class="preview-thumb">
+                            </div>
+                            <small style="font-size: 0.78rem; color: #888; font-style: italic; margin-top: 8px; display: block;">
+                                💡 Submission is optional during registration. You may submit your PPT or music file anytime before April 7, 2026, or bring it directly to the venue on April 10, 2026.
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label>College ID Card Photo *</label>
+                            <div class="file-input-group">
+                                <span>Upload ID Card</span>
+                                <input type="file" name="collegeId" accept="image/*" required onchange="previewFile(this)">
+                                <img class="preview-thumb">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Proof (₹300) *</label>
+                            <div class="file-input-group">
+                                <span>Upload Screenshot</span>
+                                <input type="file" name="paymentProof" accept="image/*" required onchange="previewFile(this)">
+                                <img class="preview-thumb">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-gold submit-btn" style="width: 100%; margin-top: 2rem;">
+                        <span class="btn-text">Submit Registration</span>
+                        <div class="spinner"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Event Modals -->
+    <!-- Paper Presentation -->
+    <div id="modal-paper" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeModal('paper')">&times;</button>
+            <div class="modal-title">📄 Paper Presentation</div>
+            <div class="modal-topic">Topic: "Engineering Innovations for Sustainable Development"</div>
+            <p>Students present technical research on engineering topics using PowerPoint.</p>
+            <div class="modal-section-title">Mode of Conduct</div>
+            <p>Submit abstract before event. Present using PPT (Max 8 slides).</p>
+            <div class="modal-section-title">Rules & Regulations</div>
+            <ul class="modal-rules">
+                <li>Technical/Engineering related content only.</li>
+                <li>Time: 6-7 min presentation + 2 min Q&A.</li>
+                <li>No plagiarism allowed.</li>
+                <li>Judges' decision is final.</li>
+            </ul>
+            <p><b>Team Size:</b> 1–2 Members</p>
+            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
+            <span class="modal-deadline">📎 PPT Submission: April 7, 2026</span>
+            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="registerForEvent('Paper Presentation')">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Poster Presentation -->
+    <div id="modal-poster" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeModal('poster')">&times;</button>
+            <div class="modal-title">🖼️ Poster Presentation</div>
+            <div class="modal-topic">Topic: "Engineering Innovations for Sustainable Development"</div>
+            <p>Visual storytelling of engineering solutions for sustainable development.</p>
+            <div class="modal-section-title">Mode of Conduct</div>
+            <p>Prepare A1 size printed poster. Explain to judges for 3-5 min.</p>
+            <div class="modal-section-title">Rules & Regulations</div>
+            <ul class="modal-rules">
+                <li>Poster must be original and creative.</li>
+                <li>A1 size (printed or handmade).</li>
+                <li>Max explanation time: 5 minutes.</li>
+                <li>Visual clarity and data accuracy are key.</li>
+            </ul>
+            <p><b>Team Size:</b> 1–2 Members</p>
+            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
+            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="registerForEvent('Poster Presentation')">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Circuit Debugging -->
+    <div id="modal-circuit" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeModal('circuit')">&times;</button>
+            <div class="modal-title">🔌 Circuit Debugging</div>
+            <p>Identify and correct errors in electronic circuits or diagrams.</p>
+            <div class="modal-section-title">Mode of Conduct</div>
+            <p>Provided with faulty circuit diagrams or breadboard circuits to fix.</p>
+            <div class="modal-section-title">Rules & Regulations</div>
+            <ul class="modal-rules">
+                <li>No mobile phones or external help allowed.</li>
+                <li>Time limit: 20-30 minutes.</li>
+                <li>Team discussion is allowed within the team.</li>
+                <li>Accuracy and speed are the primary criteria.</li>
+            </ul>
+            <p><b>Team Size:</b> 1–2 Members</p>
+            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
+            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="registerForEvent('Circuit Debugging')">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Code-a-thon -->
+    <div id="modal-code" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeModal('code')">&times;</button>
+            <div class="modal-title">💻 Code-a-thon</div>
+            <p>Solve programming problems within a time limit using C, Python, or Java.</p>
+            <div class="modal-section-title">Mode of Conduct</div>
+            <p>Solve 3-5 coding problems on the provided systems.</p>
+            <div class="modal-section-title">Rules & Regulations</div>
+            <ul class="modal-rules">
+                <li>Restricted internet access (only specific documentation).</li>
+                <li>Allowed languages: C, Python, Java.</li>
+                <li>No copying or external communication.</li>
+                <li>Efficiency of code and time taken will be judged.</li>
+            </ul>
+            <p><b>Team Size:</b> 1–2 Members</p>
+            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
+            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="registerForEvent('Code-a-thon')">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini Startup -->
+    <div id="modal-startup" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeModal('startup')">&times;</button>
+            <div class="modal-title">🚀 Mini Startup</div>
+            <p>Pitch innovative startup ideas or product concepts to a panel of judges.</p>
+            <div class="modal-section-title">Mode of Conduct</div>
+            <p>Pitch startup idea using PPT or physical charts/models.</p>
+            <div class="modal-section-title">Rules & Regulations</div>
+            <ul class="modal-rules">
+                <li>Idea must be original and feasible.</li>
+                <li>Business model and target audience explanation required.</li>
+                <li>Time: 5-7 minutes for pitching.</li>
+                <li>Q&A session with judges follows the pitch.</li>
+            </ul>
+            <p><b>Team Size:</b> 2–4 Members</p>
+            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
+            <span class="modal-deadline">📎 PPT Submission: April 7, 2026</span>
+            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="registerForEvent('Mini Startup')">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAM -->
+    <div id="modal-jam" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeModal('jam')">&times;</button>
+            <div class="modal-title">⏱️ JAM (Just A Minute)</div>
+            <p>Speak on a given topic for one minute without hesitation or repetition.</p>
+            <div class="modal-section-title">Mode of Conduct</div>
+            <p>Pick a topic randomly from a bowl and speak for 1 minute.</p>
+            <div class="modal-section-title">Rules & Regulations</div>
+            <ul class="modal-rules">
+                <li>No hesitation, repetition, or stuttering.</li>
+                <li>No deviation from the topic.</li>
+                <li>Strictly 1 minute duration.</li>
+                <li>Language should be clear and professional.</li>
+            </ul>
+            <p><b>Team Size:</b> Individual</p>
+            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
+            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="registerForEvent('JAM')">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Find the Talent -->
+    <div id="modal-talent" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeModal('talent')">&times;</button>
+            <div class="modal-title">🌟 Find the Talent</div>
+            <p>Showcase hidden talents like singing, dancing, magic, or any unique skill.</p>
+            <div class="modal-section-title">Mode of Conduct</div>
+            <p>Perform on stage for 2-3 minutes in front of judges.</p>
+            <div class="modal-section-title">Rules & Regulations</div>
+            <ul class="modal-rules">
+                <li>Time limit: Strictly 3 minutes.</li>
+                <li>No vulgarity or offensive content.</li>
+                <li>Background music must be submitted before the deadline.</li>
+                <li>Participants must bring their own props.</li>
+            </ul>
+            <p><b>Team Size:</b> Individual</p>
+            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
+            <span class="modal-deadline">🎵 Music Submission: April 7, 2026</span>
+            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="registerForEvent('Find the Talent')">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Marketing Event -->
+    <div id="modal-marketing" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeModal('marketing')">&times;</button>
+            <div class="modal-title">📢 Marketing Event</div>
+            <p>Promote or sell a product creatively using persuasion and marketing skills.</p>
+            <div class="modal-section-title">Mode of Conduct</div>
+            <p>Teams present marketing strategies or perform a role-play advertisement.</p>
+            <div class="modal-section-title">Rules & Regulations</div>
+            <ul class="modal-rules">
+                <li>Time limit: 5 minutes.</li>
+                <li>Persuasion skills and creativity are vital.</li>
+                <li>No offensive or misleading content.</li>
+                <li>Judges' decision is final.</li>
+            </ul>
+            <p><b>Team Size:</b> 2–4 Members</p>
+            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
+            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="registerForEvent('Marketing Event')">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visi-Verse -->
+    <div id="modal-visiverse" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeModal('visiverse')">&times;</button>
+            <div class="modal-title">🧩 Visi-Verse</div>
+            <p>Teams are shown a series of images that together hint at a hidden word — it can be a movie, song, object, place, or anything. Decode the visual puzzle and guess the answer!</p>
+            <div class="modal-section-title">Rules & Regulations</div>
+            <ul class="modal-rules">
+                <li>Maximum 2 members per team.</li>
+                <li>No mobile phones allowed.</li>
+                <li>Answers must be called out clearly.</li>
+                <li>Multiple rounds with increasing difficulty.</li>
+                <li>Judges' decision is final.</li>
+            </ul>
+            <p><b>Team Size:</b> 1–2 Members</p>
+            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
+            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="registerForEvent('Visi-Verse')">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Synchro-Speak -->
+    <div id="modal-synchrospeak" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeModal('synchrospeak')">&times;</button>
+            <div class="modal-title">🤔 Synchro-Speak</div>
+            <p>One member holds an image card above their head facing outward without seeing it — showing a person, place, or thing. Their partner gives verbal clues to help them guess what it is. Race against the clock!</p>
+            <div class="modal-section-title">Rules & Regulations</div>
+            <ul class="modal-rules">
+                <li>Exactly 2 members required.</li>
+                <li>Clue-giver cannot say the word, spell it, or use rhymes.</li>
+                <li>No gestures allowed — verbal clues only.</li>
+                <li>Time limit per round: 90 seconds.</li>
+                <li>Judges' decision is final.</li>
+            </ul>
+            <p><b>Team Size:</b> Exactly 2 Members</p>
+            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
+            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="registerForEvent('Synchro-Speak')">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- E-Sports — Free Fire Modal -->
+    <div id="modal-esports" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-btn" onclick="closeModal('esports')">&times;</button>
+            <div class="modal-title">🎮 E-Sports — Free Fire</div>
+            <p>Battle it out in Free Fire duo mode! Team up with your partner and fight your way to victory in this intense battle royale competition.</p>
+            <div class="modal-section-title">Mode of Conduct</div>
+            <p>• Matches will be conducted in Duo mode<br>
+               • Tournament bracket format<br>
+               • Participants MUST bring their own mobile device with Free Fire installed and fully charged<br>
+               • Ensure your device is charged and game is updated before arriving at the venue</p>
+            <div class="modal-section-title">Rules & Regulations</div>
+            <ul class="modal-rules">
+                <li>Exactly 2 members per team (Duo mode only)</li>
+                <li>Free Fire game only — no other game permitted</li>
+                <li>Participants must bring their own device (mobile phone) with Free Fire installed</li>
+                <li>Device must be fully charged before the match</li>
+                <li>Organisers will NOT provide any devices</li>
+                <li>Hacking, modding, or using any cheat tools is strictly prohibited and leads to immediate disqualification</li>
+                <li>No offensive language or unsportsmanlike behavior</li>
+                <li>Judges' / organizers' decision is final</li>
+                <li>Both members must be present at the venue</li>
+                <li>Teams must report 15 minutes before their match</li>
+            </ul>
+            <p><b>Team Size:</b> Exactly 2 members (Duo)</p>
+            <span class="modal-deadline" style="font-weight: bold; color: #d63031;">📋 Registration Deadline: April 7, 2026</span>
+            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
+            <div class="modal-footer">
+                <button class="btn btn-gold" onclick="registerForEvent('E-Sports Free Fire')">Register Now</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="successOverlay" class="success-overlay">
+        <div style="font-size: 5rem; margin-bottom: 2rem;">🎉</div>
+        <h2>Success!</h2>
+        <p style="font-size: 1.5rem; margin: 1rem 0;">You're registered for KITH 2026!</p>
+        <p>Symposium Date: April 10, 2026</p>
+        <button class="btn btn-gold" style="margin-top: 2rem;" onclick="location.reload()">Back to Home</button>
+    </div>
+
+    <button class="back-to-top" id="backToTop" onclick="scrollToTop()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+    </button>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="hero-association" style="margin-bottom: 1rem;">KITH 2026</div>
+            <p>7th Sense Association | Department of Science and Humanities</p>
+            <p>Nadar Saraswathi College of Engineering & Technology</p>
+            <p>Vadapudupatti, Annanji (PO), Theni – 625531</p>
+            <p style="font-size: 0.8rem; margin-top: 2rem; opacity: 0.5;">© 2026 KITH Symposium. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyKzy3aLDK27G1dSSf-RFJ3SXxwImWlxSBNRMZdk4lMFRYejwa5MwkQH1ouvd4Mp7pT/exec";
+
+                window.toggleMenu = function() {
+                    const nav = document.getElementById('navLinks');
+                    const toggle = document.getElementById('navToggle');
+                    nav.classList.toggle('open');
+                    toggle.classList.toggle('active');
+                }
+                window.closeMenu = function() {
+                    document.getElementById('navLinks').classList.remove('open');
+                    document.getElementById('navToggle').classList.remove('active');
+                }
+                // Close menu when clicking outside
+                document.addEventListener('click', function(e) {
+                    const nav = document.getElementById('navLinks');
+                    const toggle = document.getElementById('navToggle');
+                    if (nav && toggle && !nav.contains(e.target) && !toggle.contains(e.target)) {
+                        nav.classList.remove('open');
+                        toggle.classList.remove('active');
+                    }
+                });
+
+                window.switchTab = function(btn, tab) {
+                    document.querySelectorAll('.events-grid').forEach(g => {
+                        g.classList.remove('active');
+                        g.style.display = 'none';
+                    });
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    
+                    const activeGrid = document.getElementById(`${tab}-grid`);
+                    activeGrid.classList.add('active');
+                    activeGrid.style.display = 'grid';
+                    btn.classList.add('active');
+                }
+
+                window.openModal = function(eventId) {
+                    const modal = document.getElementById(`modal-${eventId}`);
+                    modal.style.display = 'flex';
+                    setTimeout(() => modal.classList.add('active'), 10);
+                }
+
+                window.closeModal = function(eventId) {
+                    const modal = document.getElementById(`modal-${eventId}`);
+                    modal.classList.remove('active');
+                    setTimeout(() => modal.style.display = 'none', 350);
+                }
+
+                window.registerForEvent = function(eventName) {
+                    // Close all modals
+                    document.querySelectorAll('.modal-overlay').forEach(m => {
+                        m.classList.remove('active');
+                        m.style.display = 'none';
+                    });
+                    
+                    const eventSelect1 = document.getElementById('eventSelect1');
+                    eventSelect1.value = eventName;
+                    document.getElementById('register').scrollIntoView({ behavior: 'smooth' });
+                    handleEventChange();
+                }
+
+                // --- Form Logic ---
+                const form = document.getElementById('regForm');
+                const eventSelect1 = document.getElementById('eventSelect1');
+                const eventSelect2 = document.getElementById('eventSelect2');
+                const memberCount = document.getElementById('memberCount');
+                const memberDetailsGroup = document.getElementById('memberDetailsGroup');
+                const submissionFileGroup = document.getElementById('submissionFileGroup');
+                const submissionLabel = document.getElementById('submissionLabel');
+
+                function handleEventChange() {
+                    const val1 = eventSelect1.value;
+                    const val2 = eventSelect2.value;
+                    const infoBadge = document.getElementById('infoBadge');
+                    const teamNameGroup = document.getElementById('teamNameGroup');
+                    const limitHint = document.getElementById('limitHint');
+                    const eventError = document.getElementById('eventError');
+                    
+                    // Validation: same event twice
+                    if (val1 && val2 && val1 === val2) {
+                        eventError.style.display = 'block';
+                    } else {
+                        eventError.style.display = 'none';
+                    }
+
+                    // Event Limits Mapping
+                    const eventLimits = {
+                        'Paper Presentation': { min: 1, max: 2, type: 'team' },
+                        'Poster Presentation': { min: 1, max: 2, type: 'team' },
+                        'Circuit Debugging': { min: 1, max: 2, type: 'team' },
+                        'Code-a-thon': { min: 1, max: 2, type: 'team' },
+                        'Mini Startup': { min: 1, max: 4, type: 'team' },
+                        'JAM': { min: 1, max: 1, type: 'individual' },
+                        'Find the Talent': { min: 1, max: 1, type: 'individual' },
+                        'Marketing Event': { min: 1, max: 4, type: 'team' },
+                        'Visi-Verse': { min: 1, max: 2, type: 'team' },
+                        'Synchro-Speak': { min: 2, max: 2, type: 'team' },
+                        'E-Sports Free Fire': { min: 2, max: 2, type: 'team' }
+                    };
+
+                    const config1 = eventLimits[val1] || { min: 1, max: 1, type: 'individual' };
+                    const config2 = val2 ? (eventLimits[val2] || { min: 1, max: 1, type: 'individual' }) : null;
+
+                    let finalMin = config1.min;
+                    let finalMax = config1.max;
+                    let isTeam = config1.type === 'team';
+
+                    if (config2) {
+                        if (config2.type === 'team') isTeam = true;
+                        finalMin = Math.max(config1.min, config2.min);
+                        finalMax = Math.min(config1.max, config2.max);
+                    }
+
+                    memberCount.min = finalMin;
+                    memberCount.max = finalMax;
+                    limitHint.innerText = `Allowed members: ${finalMin} - ${finalMax}`;
+
+                    if (!isTeam) {
+                        memberCount.value = 1;
+                        memberCount.readOnly = true;
+                        infoBadge.style.display = 'flex';
+                        teamNameGroup.style.display = 'none';
+                        memberDetailsGroup.style.display = 'none';
+                        document.getElementById('teamName').value = 'Individual';
+                    } else {
+                        memberCount.readOnly = false;
+                        infoBadge.style.display = 'none';
+                        teamNameGroup.style.display = 'block';
+                        memberDetailsGroup.style.display = 'block';
+                        if (document.getElementById('teamName').value === 'Individual') {
+                            document.getElementById('teamName').value = '';
+                        }
+                    }
+
+                    const pptEvents = ['Paper Presentation', 'Mini Startup'];
+                    const musicEvents = ['Find the Talent'];
+                    
+                    const needsPpt = pptEvents.includes(val1) || pptEvents.includes(val2);
+                    const needsMusic = musicEvents.includes(val1) || musicEvents.includes(val2);
+                    const needsFile = needsPpt || needsMusic;
+
+                    submissionFileGroup.style.display = needsFile ? 'block' : 'none';
+                    
+                    const fileInput = document.getElementById('submissionFile');
+                    if (needsPpt && needsMusic) {
+                        submissionLabel.innerText = 'Upload PPT / Music File (Optional)';
+                        fileInput.accept = ".ppt,.pptx,.pdf,.mp3,.mp4,.wav";
+                    } else if (needsPpt) {
+                        submissionLabel.innerText = 'Upload PPT File (Optional)';
+                        fileInput.accept = ".ppt,.pptx,.pdf";
+                    } else if (needsMusic) {
+                        submissionLabel.innerText = 'Upload Music File (Optional)';
+                        fileInput.accept = ".mp3,.mp4,.wav";
+                    }
+                }
+
+                eventSelect1.addEventListener('change', handleEventChange);
+                eventSelect2.addEventListener('change', handleEventChange);
+
+                window.previewFile = function(input) {
+                    const file = input.files[0];
+                    const thumb = input.parentElement.querySelector('.preview-thumb');
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = e => { thumb.src = e.target.result; thumb.style.display = 'block'; };
+                        reader.readAsDataURL(file);
+                    } else if (thumb) {
+                        thumb.style.display = 'none';
+                    }
+                }
+
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const submitBtn = form.querySelector('.submit-btn');
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+
+                    try {
+                        const formData = new FormData(form);
+                        const payload = {};
+                        for (let [key, value] of formData.entries()) {
+                            if (value instanceof File) {
+                                if (value.size > 0) {
+                                    if (key === 'submissionFile') {
+                                        if (value.size > 20 * 1024 * 1024) {
+                                            throw new Error("Submission file exceeds 20MB limit.");
+                                        }
+                                        const fileName = value.name.toLowerCase();
+                                        const val1 = eventSelect1.value;
+                                        const val2 = eventSelect2.value;
+                                        const pptEvents = ['Paper Presentation', 'Mini Startup'];
+                                        const musicEvents = ['Find the Talent'];
+                                        const isPpt = pptEvents.includes(val1) || pptEvents.includes(val2);
+                                        const isMusic = musicEvents.includes(val1) || musicEvents.includes(val2);
+                                        
+                                        let allowed = [];
+                                        if (isPpt) allowed = allowed.concat(['.ppt', '.pptx', '.pdf']);
+                                        if (isMusic) allowed = allowed.concat(['.mp3', '.mp4', '.wav']);
+                                        
+                                        const hasValidExt = allowed.some(ext => fileName.endsWith(ext));
+                                        if (!hasValidExt) {
+                                            throw new Error("Invalid file type for the selected event.");
+                                        }
+                                    }
+                                    payload[key] = await toBase64(value);
+                                } else if (key === 'submissionFile') {
+                                    payload[key] = "Will submit on event day";
+                                }
+                            } else {
+                                payload[key] = value;
+                            }
+                        }
+
+                        // Combine events for Google Sheets
+                        const ev1 = payload.event1;
+                        const ev2 = payload.event2;
+                        if (ev1 && ev2) {
+                            payload.event = `Event 1: ${ev1}, Event 2: ${ev2}`;
+                        } else if (ev1) {
+                            payload.event = `Event 1: ${ev1} only`;
+                        }
+
+                        await fetch(GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            body: JSON.stringify(payload)
+                        });
+
+                        submitBtn.classList.remove('loading');
+                        submitBtn.classList.add('success');
+                        
+                        setTimeout(() => {
+                            document.getElementById('successOverlay').style.display = 'flex';
+                            form.reset();
+                            submitBtn.classList.remove('success');
+                            submitBtn.disabled = false;
+                        }, 1000);
+                    } catch (err) {
+                        console.error('Error:', err);
+                        alert("Submission failed. Please try again.");
+                        submitBtn.classList.remove('loading');
+                        submitBtn.disabled = false;
+                    }
+                });
+
+                const toBase64 = file => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+
+                // --- Scroll Reveal & Animations ---
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '0px 0px -50px 0px',
+                    threshold: 0.05
+                };
+
+                const observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('in-view');
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'none';
+                            if (entry.target.classList.contains('fee-section')) {
+                                startCounter();
+                            }
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, observerOptions);
+
+                // Observe everything
+                document.querySelectorAll(
+                    'section, .fade-up, .fade-left, .fade-right, .event-card, .coordinator-card, .patron-card'
+                ).forEach(function(el) {
+                    observer.observe(el);
+                });
+
+                // Also immediately show elements already in viewport
+                document.querySelectorAll(
+                    'section, .fade-up, .fade-left, .fade-right'
+                ).forEach(function(el) {
+                    var rect = el.getBoundingClientRect();
+                    if (rect.top < window.innerHeight) {
+                        el.style.opacity = '1';
+                        el.style.transform = 'none';
+                        el.classList.add('in-view');
+                    }
+                });
+
+                function startCounter() {
+                    const counters = document.querySelectorAll('.counter');
+                    counters.forEach(counter => {
+                        const target = +counter.getAttribute('data-target');
+                        const update = () => {
+                            const count = +counter.innerText;
+                            const inc = target / 100;
+                            if (count < target) {
+                                counter.innerText = Math.ceil(count + inc);
+                                setTimeout(update, 20);
+                            } else {
+                                counter.innerText = target;
+                            }
+                        };
+                        update();
+                    });
+                }
+
+                const backToTop = document.getElementById('backToTop');
+                window.addEventListener('scroll', () => {
+                    const nav = document.getElementById('navbar');
+                    if (window.scrollY > 80) nav.classList.add('scrolled');
+                    else nav.classList.remove('scrolled');
+
+                    if (window.scrollY > 500) backToTop.classList.add('visible');
+                    else backToTop.classList.remove('visible');
+                });
+
+                window.scrollToTop = function() {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+
+            } catch(e) {
+                console.error('Init error:', e);
+                // Show all content if JS fails
+                document.querySelectorAll('.fade-up, .fade-left, .fade-right')
+                    .forEach(function(el) {
+                        el.style.opacity = '1';
+                        el.style.transform = 'none';
+                    });
+            }
+        });
+
+        // Fallback: show everything after 1 second if observer fails
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.body.classList.add('loaded');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
