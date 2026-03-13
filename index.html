@@ -11,10 +11,12 @@
     STEP 1: Create a Google Sheet
       - Go to sheets.google.com → create a new sheet
       - Name it: "KITH 2026 Registrations"
-      - Row 1 headers (A to M):
-        Timestamp | Name | Department | Year | Mobile | Email |
-        Team Name | No. of Members | Member Details | Event |
-        College ID (Base64) | Payment Proof (Base64) | PPT/Music File (Base64)
+      - Row 1 headers (A to O):
+        Timestamp | Name | Department | Year | College Name | Mobile | Email |
+        Team Name | No. of Members | Member Details | Event 1 | Event 2 |
+        College ID (Base64) | Payment Proof (Base64) | PPT/Music File
+      - IMPORTANT: If you are updating an existing sheet, you MUST insert a 
+        new column at 'E' for "College Name" and shift remaining headers right.
 
     STEP 2: Open Apps Script
       - In the sheet: Extensions → Apps Script
@@ -35,19 +37,21 @@
         var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
         var data = JSON.parse(e.postData.contents);
         sheet.appendRow([
-          new Date(),
-          data.name,
-          data.department,
-          data.year,
-          data.mobile,
-          data.email,
-          data.teamName,
-          data.memberCount,
-          data.memberDetails,
-          data.event,
-          data.collegeId,
-          data.paymentProof,
-          data.submissionFile || "Will submit on event day"
+          new Date(),       // A - Timestamp
+          data.name,        // B - Full Name
+          data.department,  // C - Department
+          data.year,        // D - Year of Study
+          data.collegeName, // E - College Name (NEW)
+          data.mobile,      // F - Mobile
+          data.email,       // G - Email
+          data.teamName,    // H - Team Name
+          data.memberCount, // I - No. of Members
+          data.memberDetails, // J - Member Details
+          data.event1,      // K - Event 1
+          data.event2,      // L - Event 2
+          data.collegeId,   // M - College ID
+          data.paymentProof, // N - Payment Proof
+          data.submissionFile || "Will submit on event day" // O
         ]);
         return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
       } catch(err) {
@@ -1166,6 +1170,10 @@
                             <label>Email Address *</label>
                             <input type="email" name="email" class="form-control" required>
                         </div>
+                        <div class="form-group">
+                            <label>College Name *</label>
+                            <input type="text" name="collegeName" id="collegeName" class="form-control" placeholder="Enter your college name" required>
+                        </div>
                         <div class="form-group" id="teamNameGroup">
                             <label>Team Name *</label>
                             <input type="text" name="teamName" id="teamName" class="form-control" placeholder="Enter your team name" required>
@@ -1247,6 +1255,33 @@
                                 <span>Upload ID Card</span>
                                 <input type="file" name="collegeId" accept="image/*" required onchange="previewFile(this)">
                                 <img class="preview-thumb">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Domain *</label>
+                            <select name="domain" id="domain" class="form-control" required>
+                                <option value="">Select Domain</option>
+                                <option value="Technical">Technical</option>
+                                <option value="Non-Technical">Non-Technical</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <div id="feeTip" style="background: #fff9e6; border: 1px solid #ffeaa7; border-radius: 12px; padding: 15px; display: flex; align-items: flex-start; gap: 12px;">
+                                <span style="font-size: 1.2rem;">💡</span>
+                                <div style="flex: 1;">
+                                    <p style="font-size: 14px; color: #636e72; margin-bottom: 10px;">
+                                        Registration Fee: ₹300 per person. If you're registering as a team, the total fee = ₹300 × number of members.
+                                    </p>
+                                    <div style="display: flex; align-items: center; gap: 15px;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <label style="font-size: 13px; margin-bottom: 0;">Number of members:</label>
+                                            <input type="number" id="calcMembers" value="1" min="1" max="10" style="width: 60px; padding: 5px; border-radius: 6px; border: 1px solid #ddd; font-family: var(--font-body);">
+                                        </div>
+                                        <div style="font-weight: 700; color: #c9a84c; font-size: 16px;">
+                                            Total Fee: <span id="totalFeeText" style="display: inline-block; transition: all 0.3s ease;">₹300</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
@@ -1724,6 +1759,21 @@
                     }
                 }
 
+                // --- Fee Calculator Logic ---
+                const calcMembers = document.getElementById('calcMembers');
+                const totalFeeText = document.getElementById('totalFeeText');
+                if (calcMembers && totalFeeText) {
+                    calcMembers.addEventListener('input', () => {
+                        const count = parseInt(calcMembers.value) || 1;
+                        const total = count * 300;
+                        totalFeeText.style.transform = 'scale(1.1)';
+                        setTimeout(() => {
+                            totalFeeText.innerText = `₹${total}`;
+                            totalFeeText.style.transform = 'scale(1)';
+                        }, 100);
+                    });
+                }
+
                 eventSelect1.addEventListener('change', handleEventChange);
                 eventSelect2.addEventListener('change', handleEventChange);
 
@@ -1789,6 +1839,9 @@
                         } else if (ev1) {
                             payload.event = `Event 1: ${ev1} only`;
                         }
+
+                        // Explicitly ensure collegeName is in payload as requested
+                        payload.collegeName = document.getElementById('collegeName').value;
 
                         await fetch(GOOGLE_SCRIPT_URL, {
                             method: 'POST',
