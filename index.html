@@ -65,21 +65,215 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
     <style>
         :root {
-            --sage: #d4e6d1;
-            --lavender: #e8e4f0;
-            --cream: #fef9f0;
-            --rose: #f5e6e8;
-            --blue: #ddeeff;
             --gold: #c9a84c;
             --white: #ffffff;
-            --text-dark: #2d3436;
-            --text-muted: #636e72;
-            --deadline: #d63031;
-            --font-heading: 'Cormorant Garamond', serif;
+            --text-dark: #2c2c2c;
+            --text-muted: #666;
+            --font-heading: 'Cinzel', serif;
             --font-body: 'DM Sans', sans-serif;
-            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --transition: all 0.3s ease;
+            --cream: #fef9f0;
+            --lavender: #e8e4f0;
+            --deadline: #d63031;
         }
 
+        /* --- Epic Loading Animation --- */
+        .submit-btn {
+            position: relative;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-text {
+            transition: opacity 0.3s ease;
+        }
+        .submit-btn .spinner {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #epicLoadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        #epicLoadingOverlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .loading-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        #epicLoadingOverlay.active .loading-card {
+            transform: scale(1);
+        }
+
+        .loading-logo {
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            animation: breathe 3s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .loading-steps {
+            height: 60px;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        .loading-step {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .loading-step.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .step-icon { font-size: 1.5rem; }
+        .step-text { font-weight: 500; color: var(--text-muted); }
+
+        .loading-progress {
+            width: 100%;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        .loading-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--gold), #e8c66a);
+            transition: width 0.5s ease;
+        }
+
+        /* Ambient Particles */
+        .ambient-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(201, 168, 76, 0.2);
+            border-radius: 50%;
+            animation: floatUp 8s linear infinite;
+        }
+        @keyframes floatUp {
+            from { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 0.5; }
+            to { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* Success/Error Icons */
+        .success-icon, .error-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+        }
+        .checkmark__circle, .error__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #7ac142;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .error__circle { stroke: #d63031; }
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke: #7ac142;
+            stroke-width: 3;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        .error__line {
+            stroke: #d63031;
+            stroke-width: 3;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        .confetti-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confettiFall 3s ease-out forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(300px) rotate(720deg); opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .loading-card { padding: 2rem; }
+            .loading-logo { font-size: 2.5rem; }
+        }
+    </style>
+
+    <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         body {
@@ -1257,14 +1451,6 @@
                                 <img class="preview-thumb">
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Domain *</label>
-                            <select name="domain" id="domain" class="form-control" required>
-                                <option value="">Select Domain</option>
-                                <option value="Technical">Technical</option>
-                                <option value="Non-Technical">Non-Technical</option>
-                            </select>
-                        </div>
                         <div class="form-group full-width">
                             <div id="feeTip" style="background: #fff9e6; border: 1px solid #ffeaa7; border-radius: 12px; padding: 15px; display: flex; align-items: flex-start; gap: 12px;">
                                 <span style="font-size: 1.2rem;">💡</span>
@@ -1579,14 +1765,6 @@
         </div>
     </div>
 
-    <div id="successOverlay" class="success-overlay">
-        <div style="font-size: 5rem; margin-bottom: 2rem;">🎉</div>
-        <h2>Success!</h2>
-        <p style="font-size: 1.5rem; margin: 1rem 0;">You're registered for KITH 2026!</p>
-        <p>Symposium Date: April 10, 2026</p>
-        <button class="btn btn-gold" style="margin-top: 2rem;" onclick="location.reload()">Back to Home</button>
-    </div>
-
     <button class="back-to-top" id="backToTop" onclick="scrollToTop()">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
     </button>
@@ -1601,7 +1779,47 @@
         </div>
     </footer>
 
+    <!-- Epic Loading Overlay -->
+    <div id="epicLoadingOverlay">
+        <div class="ambient-particles">
+            <!-- Particles generated by JS -->
+        </div>
+        <div class="loading-card">
+            <div class="loading-logo">KITH</div>
+            <div class="loading-steps">
+                <div class="loading-step active">
+                    <span class="step-icon">📤</span>
+                    <span class="step-text">Uploading payment proof...</span>
+                </div>
+                <div class="loading-step">
+                    <span class="step-icon">✅</span>
+                    <span class="step-text">Saving your details...</span>
+                </div>
+                <div class="loading-step">
+                    <span class="step-icon">✨</span>
+                    <span class="step-text">Almost done...</span>
+                </div>
+            </div>
+            <div class="loading-progress">
+                <div class="loading-progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Generate ambient particles
+        const particleContainer = document.querySelector('.ambient-particles');
+        for (let i = 0; i < 12; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.width = Math.random() * 10 + 5 + 'px';
+            p.style.height = p.style.width;
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDelay = Math.random() * 5 + 's';
+            p.style.animationDuration = Math.random() * 5 + 5 + 's';
+            particleContainer.appendChild(p);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             try {
                 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyKzy3aLDK27G1dSSf-RFJ3SXxwImWlxSBNRMZdk4lMFRYejwa5MwkQH1ouvd4Mp7pT/exec";
@@ -1792,8 +2010,44 @@
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const submitBtn = form.querySelector('.submit-btn');
-                    submitBtn.classList.add('loading');
+                    const btnText = submitBtn.querySelector('.btn-text');
+                    const btnSpinner = submitBtn.querySelector('.spinner');
+                    
+                    // 1. Button Morph Animation
                     submitBtn.disabled = true;
+                    submitBtn.style.width = '50px';
+                    submitBtn.style.height = '50px';
+                    submitBtn.style.borderRadius = '50%';
+                    submitBtn.style.padding = '0';
+                    btnText.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        btnSpinner.style.display = 'block';
+                        btnSpinner.style.opacity = '1';
+                    }, 300);
+
+                    // 2. Show Epic Loading Overlay
+                    const overlay = document.getElementById('epicLoadingOverlay');
+                    const steps = document.querySelectorAll('.loading-step');
+                    const progressBar = document.querySelector('.loading-progress-fill');
+                    const loadingCard = document.querySelector('.loading-card');
+                    
+                    setTimeout(() => {
+                        overlay.classList.add('active');
+                        
+                        // Progress steps animation
+                        let currentStep = 0;
+                        const interval = setInterval(() => {
+                            if (currentStep < steps.length) {
+                                steps.forEach(s => s.classList.remove('active'));
+                                steps[currentStep].classList.add('active');
+                                progressBar.style.width = `${((currentStep + 1) / steps.length) * 100}%`;
+                                currentStep++;
+                            } else {
+                                clearInterval(interval);
+                            }
+                        }, 1500);
+                    }, 600);
 
                     try {
                         const formData = new FormData(form);
@@ -1843,28 +2097,110 @@
                         // Explicitly ensure collegeName is in payload as requested
                         payload.collegeName = document.getElementById('collegeName').value;
 
-                        await fetch(GOOGLE_SCRIPT_URL, {
+                        const response = await fetch(GOOGLE_SCRIPT_URL, {
                             method: 'POST',
                             mode: 'no-cors',
                             body: JSON.stringify(payload)
                         });
 
-                        submitBtn.classList.remove('loading');
-                        submitBtn.classList.add('success');
-                        
+                        // 3. Success State
                         setTimeout(() => {
-                            document.getElementById('successOverlay').style.display = 'flex';
+                            loadingCard.innerHTML = `
+                                <div class="success-icon">
+                                    <svg viewBox="0 0 52 52">
+                                        <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                                        <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                                    </svg>
+                                </div>
+                                <h2 style="margin-top: 20px; color: #2d3436; animation: bounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);">Registration Successful! 🎉</h2>
+                                <p style="color: #636e72; margin-top: 10px; opacity: 0; animation: fadeIn 0.5s forwards 0.5s;">We'll see you at KITH 2026!</p>
+                                <button class="btn btn-gold" onclick="closeEpicOverlay()" style="margin-top: 30px; width: 100%;">Close</button>
+                                <div class="confetti-container"></div>
+                            `;
+                            createConfetti();
                             form.reset();
-                            submitBtn.classList.remove('success');
-                            submitBtn.disabled = false;
-                        }, 1000);
+                            
+                            // Auto dismiss after 3 seconds as requested
+                            setTimeout(closeEpicOverlay, 3000);
+                        }, 2000);
+
                     } catch (err) {
                         console.error('Error:', err);
-                        alert("Submission failed. Please try again.");
-                        submitBtn.classList.remove('loading');
-                        submitBtn.disabled = false;
+                        // Error State
+                        loadingCard.innerHTML = `
+                            <div class="error-icon">
+                                <svg viewBox="0 0 52 52">
+                                    <circle class="error__circle" cx="26" cy="26" r="25" fill="none"/>
+                                    <path class="error__line" fill="none" d="M17.3 17.3l17.4 17.4M34.7 17.3L17.3 34.7"/>
+                                </svg>
+                            </div>
+                            <h2 style="margin-top: 20px; color: #d63031;">Oops! Something went wrong.</h2>
+                            <p style="color: #636e72; margin-top: 10px;">${err.message || "Please try again later."}</p>
+                            <button class="btn btn-gold" onclick="closeEpicOverlay()" style="margin-top: 30px; width: 100%;">Try Again</button>
+                        `;
                     }
                 });
+
+                window.closeEpicOverlay = function() {
+                    const overlay = document.getElementById('epicLoadingOverlay');
+                    const submitBtn = form.querySelector('.submit-btn');
+                    const btnText = submitBtn.querySelector('.btn-text');
+                    const btnSpinner = submitBtn.querySelector('.spinner');
+
+                    overlay.classList.remove('active');
+                    
+                    // Reset button
+                    setTimeout(() => {
+                        submitBtn.style.width = '100%';
+                        submitBtn.style.height = 'auto';
+                        submitBtn.style.borderRadius = '12px';
+                        submitBtn.style.padding = '1.2rem 2.5rem';
+                        btnText.style.opacity = '1';
+                        btnSpinner.style.display = 'none';
+                        submitBtn.disabled = false;
+                        
+                        // Reset loading card for next time
+                        resetLoadingCard();
+                    }, 500);
+                }
+
+                function resetLoadingCard() {
+                    const loadingCard = document.querySelector('.loading-card');
+                    loadingCard.innerHTML = `
+                        <div class="loading-logo">KITH</div>
+                        <div class="loading-steps">
+                            <div class="loading-step active">
+                                <span class="step-icon">📤</span>
+                                <span class="step-text">Uploading payment proof...</span>
+                            </div>
+                            <div class="loading-step">
+                                <span class="step-icon">✅</span>
+                                <span class="step-text">Saving your details...</span>
+                            </div>
+                            <div class="loading-step">
+                                <span class="step-icon">✨</span>
+                                <span class="step-text">Almost done...</span>
+                            </div>
+                        </div>
+                        <div class="loading-progress">
+                            <div class="loading-progress-fill"></div>
+                        </div>
+                    `;
+                }
+
+                function createConfetti() {
+                    const container = document.querySelector('.confetti-container');
+                    const colors = ['#c9a84c', '#d4e6d1', '#e8e4f0', '#f5e6e8', '#ddeeff'];
+                    for (let i = 0; i < 40; i++) {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * 100 + '%';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.animationDelay = Math.random() * 2 + 's';
+                        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                        container.appendChild(confetti);
+                    }
+                }
 
                 const toBase64 = file => new Promise((resolve, reject) => {
                     const reader = new FileReader();
