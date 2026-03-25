@@ -1314,38 +1314,7 @@
                     <button class="btn btn-outline" onclick="openModal('marketing')">View Details</button>
                 </div>
 
-                <!-- Card 4: Visi-Verse -->
-                <div class="event-card nontech">
-                    <div class="new-badge">NEW 🎉</div>
-                    <div class="event-icon">🧩</div>
-                    <span class="label-badge" style="color: #8e44ad;">Non-Technical</span>
-                    <h3>Visi-Verse</h3>
-                    <div class="event-team">👥 1–2 Members</div>
-                    <p class="event-desc">Decode visual puzzles from a series of images to guess the hidden word!</p>
-                    <button class="btn btn-outline" onclick="openModal('visiverse')">View Details</button>
-                </div>
 
-                <!-- Card 5: Synchro-Speak -->
-                <div class="event-card nontech">
-                    <div class="new-badge">NEW 🎉</div>
-                    <div class="event-icon">🤔</div>
-                    <span class="label-badge" style="color: #8e44ad;">Non-Technical</span>
-                    <h3>Synchro-Speak</h3>
-                    <div class="event-team">👥 2 Members</div>
-                    <p class="event-desc">One member guesses the card on their head using verbal clues from their partner.</p>
-                    <button class="btn btn-outline" onclick="openModal('synchrospeak')">View Details</button>
-                </div>
-
-                <!-- Card 6: E-Sports — Free Fire -->
-                <div class="event-card nontech">
-                    <div class="new-badge">NEW 🎉</div>
-                    <div class="event-icon">🎮</div>
-                    <span class="label-badge" style="color: #8e44ad;">Non-Technical</span>
-                    <h3>E-Sports — Free Fire</h3>
-                    <div class="event-team">👥 Duo (Exactly 2 members)</div>
-                    <p class="event-desc">Compete in Free Fire duo mode. Show your gaming skills and teamwork in the ultimate battle royale challenge!</p>
-                    <button class="btn btn-outline" onclick="openModal('esports')">View Details</button>
-                </div>
             </div>
         </div>
     </section>
@@ -1497,9 +1466,6 @@
                                     <option value="JAM">JAM / Just a Minute (Individual)</option>
                                     <option value="Find the Talent">Find the Talent (Individual)</option>
                                     <option value="Marketing Event">Marketing Event (Max 4)</option>
-                                    <option value="Visi-Verse">Visi-Verse (Max 2)</option>
-                                    <option value="Synchro-Speak">Synchro-Speak (Exactly 2)</option>
-                                    <option value="E-Sports Free Fire">Non-Technical – E-Sports Free Fire (Duo – 2 members)</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -1518,9 +1484,6 @@
                                     <option value="JAM">JAM / Just a Minute (Individual)</option>
                                     <option value="Find the Talent">Find the Talent (Individual)</option>
                                     <option value="Marketing Event">Marketing Event (Max 4)</option>
-                                    <option value="Visi-Verse">Visi-Verse (Max 2)</option>
-                                    <option value="Synchro-Speak">Synchro-Speak (Exactly 2)</option>
-                                    <option value="E-Sports Free Fire">Non-Technical – E-Sports Free Fire (Duo – 2 members)</option>
                                 </optgroup>
                             </select>
                             <div id="eventError" style="color: #d63031; font-size: 0.8rem; margin-top: 5px; display: none;">
@@ -1795,84 +1758,7 @@
         </div>
     </div>
 
-    <!-- Visi-Verse -->
-    <div id="modal-visiverse" class="modal-overlay">
-        <div class="modal-box">
-            <button class="close-btn" onclick="closeModal('visiverse')">&times;</button>
-            <div class="modal-title">🧩 Visi-Verse</div>
-            <p>Teams are shown a series of images that together hint at a hidden word — it can be a movie, song, object, place, or anything. Decode the visual puzzle and guess the answer!</p>
-            <div class="modal-section-title">Rules & Regulations</div>
-            <ul class="modal-rules">
-                <li>Maximum 2 members per team.</li>
-                <li>No mobile phones allowed.</li>
-                <li>Answers must be called out clearly.</li>
-                <li>Multiple rounds with increasing difficulty.</li>
-                <li>Judges' decision is final.</li>
-            </ul>
-            <p><b>Team Size:</b> 1–2 Members</p>
-            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
-            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
-            <div class="modal-footer">
-                <button class="btn btn-gold" onclick="registerForEvent('Visi-Verse')">Register Now</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- Synchro-Speak -->
-    <div id="modal-synchrospeak" class="modal-overlay">
-        <div class="modal-box">
-            <button class="close-btn" onclick="closeModal('synchrospeak')">&times;</button>
-            <div class="modal-title">🤔 Synchro-Speak</div>
-            <p>One member holds an image card above their head facing outward without seeing it — showing a person, place, or thing. Their partner gives verbal clues to help them guess what it is. Race against the clock!</p>
-            <div class="modal-section-title">Rules & Regulations</div>
-            <ul class="modal-rules">
-                <li>Exactly 2 members required.</li>
-                <li>Clue-giver cannot say the word, spell it, or use rhymes.</li>
-                <li>No gestures allowed — verbal clues only.</li>
-                <li>Time limit per round: 90 seconds.</li>
-                <li>Judges' decision is final.</li>
-            </ul>
-            <p><b>Team Size:</b> Exactly 2 Members</p>
-            <span class="modal-deadline">📋 Registration Deadline: April 7, 2026</span>
-            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
-            <div class="modal-footer">
-                <button class="btn btn-gold" onclick="registerForEvent('Synchro-Speak')">Register Now</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- E-Sports — Free Fire Modal -->
-    <div id="modal-esports" class="modal-overlay">
-        <div class="modal-box">
-            <button class="close-btn" onclick="closeModal('esports')">&times;</button>
-            <div class="modal-title">🎮 E-Sports — Free Fire</div>
-            <p>Battle it out in Free Fire duo mode! Team up with your partner and fight your way to victory in this intense battle royale competition.</p>
-            <div class="modal-section-title">Mode of Conduct</div>
-            <p>• Matches will be conducted in Duo mode<br>
-               • Tournament bracket format<br>
-               • Participants MUST bring their own mobile device with Free Fire installed and fully charged<br>
-               • Ensure your device is charged and game is updated before arriving at the venue</p>
-            <div class="modal-section-title">Rules & Regulations</div>
-            <ul class="modal-rules">
-                <li>Exactly 2 members per team (Duo mode only)</li>
-                <li>Free Fire game only — no other game permitted</li>
-                <li>Participants must bring their own device (mobile phone) with Free Fire installed</li>
-                <li>Device must be fully charged before the match</li>
-                <li>Organisers will NOT provide any devices</li>
-                <li>Hacking, modding, or using any cheat tools is strictly prohibited and leads to immediate disqualification</li>
-                <li>No offensive language or unsportsmanlike behavior</li>
-                <li>Judges' / organizers' decision is final</li>
-                <li>Both members must be present at the venue</li>
-                <li>Teams must report 15 minutes before their match</li>
-            </ul>
-            <p><b>Team Size:</b> Exactly 2 members (Duo)</p>
-            <span class="modal-deadline" style="font-weight: bold; color: #d63031;">📋 Registration Deadline: April 7, 2026</span>
-            <span class="modal-date">🗓️ Symposium Date: April 10, 2026</span>
-            <div class="modal-footer">
-                <button class="btn btn-gold" onclick="registerForEvent('E-Sports Free Fire')">Register Now</button>
-            </div>
-        </div>
-    </div>
 
     <button class="back-to-top" id="backToTop" onclick="scrollToTop()">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
@@ -2024,10 +1910,7 @@
                         'Mini Startup': { min: 1, max: 4, type: 'team' },
                         'JAM': { min: 1, max: 1, type: 'individual' },
                         'Find the Talent': { min: 1, max: 1, type: 'individual' },
-                        'Marketing Event': { min: 1, max: 4, type: 'team' },
-                        'Visi-Verse': { min: 1, max: 2, type: 'team' },
-                        'Synchro-Speak': { min: 2, max: 2, type: 'team' },
-                        'E-Sports Free Fire': { min: 2, max: 2, type: 'team' }
+                        'Marketing Event': { min: 1, max: 4, type: 'team' }
                     };
 
                     const config1 = eventLimits[val1] || { min: 1, max: 1, type: 'individual' };
@@ -2414,4 +2297,3 @@
     </script>
 </body>
 </html>
-
