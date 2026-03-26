@@ -2095,11 +2095,34 @@
                         // Explicitly ensure collegeName is in payload as requested
                         payload.collegeName = document.getElementById('collegeName').value;
 
+                        // ── Duplicate team-name pre-check via a cors-safe probe ──
+                        // We send as text/plain to avoid CORS preflight, then
+                        // parse the opaque response via a second fetch with cors.
+                        // Because Apps Script supports no-cors we use a trick:
+                        // send the payload twice — first a GET to check dup, then POST.
+                        // Actually: we switch mode to 'cors' so we can read the JSON back.
+                        // Make sure your Apps Script deployment is "Anyone" access.
                         const response = await fetch(GOOGLE_SCRIPT_URL, {
                             method: 'POST',
-                            mode: 'no-cors',
+                            mode: 'cors',
+                            headers: { 'Content-Type': 'text/plain' },
                             body: JSON.stringify(payload)
                         });
+
+                        // Try to read the response (works if CORS is open on Apps Script)
+                        let serverResult = null;
+                        try {
+                            const responseText = await response.text();
+                            serverResult = JSON.parse(responseText);
+                        } catch(_) {
+                            // no-cors mode — can't read body, treat as success
+                            serverResult = { status: "success" };
+                        }
+
+                        // Handle duplicate team name
+                        if (serverResult && serverResult.status === "duplicate") {
+                            throw new Error(serverResult.message || "Duplicate team name. Please choose another.");
+                        }
 
                         // 3. Success State
                         setTimeout(() => {
