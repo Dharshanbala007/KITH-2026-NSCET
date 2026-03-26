@@ -1818,6 +1818,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             try {
                 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxnAJNhIaDtg_1robq4_OsxqoGv7-bkQ67vYo2JtCG2-xtdLUTZEA74n1DLl1xqxagF7Q/exec";
+                const IMGBB_API_KEY = "59bde132f195cfff9bd25fd7ee2bd141";
 
                 window.toggleMenu = function() {
                     const nav = document.getElementById('navLinks');
@@ -2062,17 +2063,18 @@
                                         const musicEvents = ['Find the Talent'];
                                         const isPpt = pptEvents.includes(val1) || pptEvents.includes(val2);
                                         const isMusic = musicEvents.includes(val1) || musicEvents.includes(val2);
-                                        
                                         let allowed = [];
                                         if (isPpt) allowed = allowed.concat(['.ppt', '.pptx', '.pdf']);
                                         if (isMusic) allowed = allowed.concat(['.mp3', '.mp4', '.wav']);
-                                        
                                         const hasValidExt = allowed.some(ext => fileName.endsWith(ext));
                                         if (!hasValidExt) {
                                             throw new Error("Invalid file type for the selected event.");
                                         }
+                                        payload[key] = "Will submit on event day";
+                                    } else {
+                                        // collegeId & paymentProof: upload to ImgBB, save clean URL in sheet
+                                        payload[key] = await uploadToImgBB(value);
                                     }
-                                    payload[key] = await toBase64(value);
                                 } else if (key === 'submissionFile') {
                                     payload[key] = "Will submit on event day";
                                 }
@@ -2198,12 +2200,25 @@
                     }
                 }
 
-                const toBase64 = file => new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = error => reject(error);
-                });
+                // Uploads image to ImgBB and returns a permanent URL
+                // Replaces Base64 — fixes Google Sheets 50k char truncation & broken image links
+                async function uploadToImgBB(file) {
+                    const base64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = () => resolve(reader.result.split(',')[1]);
+                        reader.onerror = err => reject(err);
+                    });
+                    const imgbbForm = new FormData();
+                    imgbbForm.append('key', IMGBB_API_KEY);
+                    imgbbForm.append('image', base64);
+                    imgbbForm.append('name', file.name.replace(/\s+/g, '_'));
+                    const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: imgbbForm });
+                    if (!res.ok) throw new Error('Image upload failed. Check your internet connection and try again.');
+                    const data = await res.json();
+                    if (!data.success) throw new Error('ImgBB upload error: ' + (data.error?.message || 'Unknown error'));
+                    return data.data.url; // clean permanent URL e.g. https://i.ibb.co/abc123/proof.jpg
+                }
 
                 // --- Scroll Reveal & Animations ---
                 const observerOptions = {
